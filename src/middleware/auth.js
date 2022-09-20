@@ -5,23 +5,18 @@ const BlogsModel = require("../Models/BlogsModel");
 
 //---------------------------------------------AUTHENTICATION------------------------------//
 
-const authenticate = async function (req, res, next) {
+const authenticate = async function(req, res, next) {
     try {
-
-
         let token = req.headers['x-api-key']
         if (!token) { return res.status(400).send({ status: false, msg: "Token must be present" }) }
 
-
-        jwt.verify(token, "project1-secrete-key", function (err, decodedToken) {
+        jwt.verify(token, "project1-secrete-key", function(err, decodedToken) {
 
             if (err) {
-
                 return res.status(401).send({ status: false, msg: "Token is invalid" })
 
-            }
-            else {
-                req.token = decodedToken
+            } else {
+                req.token = decodedToken.authorId
                 console.log(req.token)
 
                 next()
@@ -29,8 +24,7 @@ const authenticate = async function (req, res, next) {
             }
         })
 
-    }
-    catch (error) {
+    } catch (error) {
 
         res.status(500).send({ status: false, msg: error.message })
     }
@@ -42,22 +36,18 @@ const authenticate = async function (req, res, next) {
 
 //---------------------------------------------Authorization------------------------------//
 
-const auth = async function (req, res, next) {
+const auth = async function(req, res, next) {
     try {
 
         let Query = req.query
-
         if (Object.keys(Query).length !== 0) {
-
-
-
-            const Blog = await BlogsModel.findOne({ authorId: req.token.payload.authorId, ...Query })
+            const Blog = await BlogsModel.findOne({ authorId: req.token, ...Query })
             if (!Blog) {
                 return res.status(404).send({ status: false, message: "blog are not found" })
 
             }
 
-            if (Blog.authorId.toString() !== req.token.payload.authorId) {
+            if (Blog.authorId.toString() !== req.token) {
                 return res.status(400).send({ status: false, message: "you are not authorised" });
             }
 
@@ -76,7 +66,7 @@ const auth = async function (req, res, next) {
             return res.status(404).send({ status: false, message: "blog are not found" })
         }
 
-        if (isblog.authorId.toString() !== req.token.payload.authorId) {
+        if (isblog.authorId.toString() !== req.token) {
 
             return res.status(400).send({ status: false, message: "you have not access for authorization" });
         }

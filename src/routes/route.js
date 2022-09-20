@@ -22,7 +22,7 @@ Router.post("/blogs", commonMid.authenticate, BlogController.createBlog)
 
 //--------------------------------This is getBlog api-----------------------------//
 
-Router.get("/blogs", commonMid.authenticate, BlogController.getBlog)
+Router.get("/blogs", commonMid.authenticate, commonMid.auth, BlogController.getBlog)
 
 
 //--------------------------------This is updateBlog api-----------------------------//
