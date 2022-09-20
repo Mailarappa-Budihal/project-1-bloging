@@ -20,7 +20,7 @@ const createBlog = async function(req, res) {
         if (Object.keys(data).length == 0) {
             return res.status(400).send({
                 status: false,
-                msg: " Please provide the author details",
+                msg: " Please provide the Blog details",
             });
         }
         const { title, body, authorId, tags, category, subcategory } = data;
@@ -30,28 +30,14 @@ const createBlog = async function(req, res) {
                 .status(400)
                 .send({ status: false, msg: "please provide the title" });
         }
-        if (!/^[A-Z][a-z]{0,20}[A-Za-z]$/.test(title)) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    msg: "please provide title in Alphabets",
-                });
-        }
+
 
         if (!isValid(body)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "please provide the body" });
         }
-        if (!/^[A-Z][a-z]{0,20}[A-Za-z]$/.test(body)) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    msg: "please provide the body in alphabets",
-                });
-        }
+
 
         if (!isValid(authorId)) {
             return res
@@ -70,41 +56,19 @@ const createBlog = async function(req, res) {
                 .status(400)
                 .send({ status: false, msg: "please provide the tags" });
         }
-        if (!/^[A-Z][a-z]{0,20}[A-Za-z]$/.test(tags)) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    msg: "please provide tags in alphabets only",
-                });
-        }
 
         if (!isValid(category)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "please provide the category" });
         }
-        if (!/^[A-Z][a-z]{0,20}[A-Za-z]$/.test(category)) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    msg: "please provide the category in alphabets",
-                });
-        }
+
         if (!isValid(subcategory)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "please provide the category" });
         }
-        if (!/^[A-Z][a-z]{0,20}[A-Za-z]$/.test(subcategory)) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    msg: "please provide subcategory in Alphabets",
-                });
-        }
+
         let authorid = await AuthorModel.findById({ _id: authorId });
 
         if (!authorid) {
@@ -182,13 +146,6 @@ const updateBlog = async function(req, res) {
         }
 
         const { title, body, tags, subcategory } = data;
-        if (!title) return res.status(400).send({ status: false, msg: "please provide title" })
-
-        if (!body) return res.status(400).send({ status: false, msg: "please provide body" })
-
-        if (!tags) return res.status(400).send({ status: false, msg: "please provide tags" })
-
-        if (!subcategory) return res.status(400).send({ status: false, msg: "please provide title" })
 
         const dataBlog = await BlogsModel.findOneAndUpdate({ _id: blogId, isDeleted: false }, {
             $set: {
@@ -252,11 +209,6 @@ const deleteByquery = async function(req, res) {
         let { authorId, tags, category, subcategory, isPublished } = data;
 
         Obj = { isDeleted: false };
-        if (!isValidObjectId(authorId)) {
-            return res
-                .status(400)
-                .send({ status: false, msg: `the ${authorId}  authorId is not valid` });
-        }
         if (authorId) {
             Obj.authorId = authorId;
         }
@@ -274,7 +226,7 @@ const deleteByquery = async function(req, res) {
         }
 
         if (isPublished) {
-            obj.isPublished = isPublished;
+            Obj.isPublished = isPublished;
         }
 
         let blogDoc = await BlogsModel.findOneAndUpdate(

@@ -5,18 +5,22 @@ const BlogsModel = require("../Models/BlogsModel");
 
 //---------------------------------------------AUTHENTICATION------------------------------//
 
-const authenticate = async function(req, res, next) {
+const authentication = async function(req, res, next) {
     try {
+
+
         let token = req.headers['x-api-key']
         if (!token) { return res.status(400).send({ status: false, msg: "Token must be present" }) }
+
 
         jwt.verify(token, "project1-secrete-key", function(err, decodedToken) {
 
             if (err) {
+
                 return res.status(401).send({ status: false, msg: "Token is invalid" })
 
             } else {
-                req.token = decodedToken.authorId
+                req.token = decodedToken
                 console.log(req.token)
 
                 next()
@@ -36,26 +40,8 @@ const authenticate = async function(req, res, next) {
 
 //---------------------------------------------Authorization------------------------------//
 
-const auth = async function(req, res, next) {
+const authorization = async function(req, res, next) {
     try {
-
-        let Query = req.query
-        if (Object.keys(Query).length !== 0) {
-            const Blog = await BlogsModel.findOne({ authorId: req.token, ...Query })
-            if (!Blog) {
-                return res.status(404).send({ status: false, message: "blog are not found" })
-
-            }
-
-            if (Blog.authorId.toString() !== req.token) {
-                return res.status(400).send({ status: false, message: "you are not authorised" });
-            }
-
-            return next()
-        }
-
-
-
         //------------------------------------------- AuthorisationByparam-----------------------------------------------//
 
 
@@ -66,9 +52,9 @@ const auth = async function(req, res, next) {
             return res.status(404).send({ status: false, message: "blog are not found" })
         }
 
-        if (isblog.authorId.toString() !== req.token) {
+        if (isblog.authorId.toString() !== req.token.authorId) {
 
-            return res.status(400).send({ status: false, message: "you have not access for authorization" });
+            return res.status(403).send({ status: false, message: "you have not access for authorization" });
         }
 
         next()
@@ -81,4 +67,4 @@ const auth = async function(req, res, next) {
 }
 
 
-module.exports = { authenticate, auth }
+module.exports = { authentication, authorization }

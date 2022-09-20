@@ -17,26 +17,26 @@ Router.post("/login", AuthorController.loginAuthor)
 
 //--------------------------------This is CreateBlog api-----------------------------//
 
-Router.post("/blogs", commonMid.authenticate, BlogController.createBlog)
+Router.post("/blogs", commonMid.authentication, BlogController.createBlog)
 
 
 //--------------------------------This is getBlog api-----------------------------//
 
-Router.get("/blogs", commonMid.authenticate, commonMid.auth, BlogController.getBlog)
+Router.get("/blogs", commonMid.authentication, BlogController.getBlog)
 
 
 //--------------------------------This is updateBlog api-----------------------------//
 
-Router.put("/blogs/:blogId", commonMid.authenticate, commonMid.auth, BlogController.updateBlog)
+Router.put("/blogs/:blogId", commonMid.authentication, commonMid.authorization, BlogController.updateBlog)
 
 
 //--------------------------------This is deleteBlogs api-----------------------------//
 
-Router.delete("/blogs/:blogId", commonMid.authenticate, commonMid.auth, BlogController.deleteBlogs)
+Router.delete("/blogs/:blogId", commonMid.authentication, commonMid.authorization, BlogController.deleteBlogs)
 
 
 //--------------------------------This is deleteByquery api-----------------------------//
 
-Router.delete("/blogs", commonMid.authenticate, commonMid.auth, BlogController.deleteByquery)
+Router.delete("/blogs", commonMid.authentication, BlogController.deleteByquery)
 
 module.exports = Router;
