@@ -1,70 +1,63 @@
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose")
+const validator = require("../validator/validator")
 const BlogsModel = require("../Models/BlogsModel");
 
 
 
 //---------------------------------------------AUTHENTICATION------------------------------//
 
-const authentication = async function(req, res, next) {
+const authentication = function(req, res, next) {
     try {
-
-
-        let token = req.headers['x-api-key']
-        if (!token) { return res.status(400).send({ status: false, msg: "Token must be present" }) }
+        let token = req.headers["x-api-key"];
+        if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
 
 
         jwt.verify(token, "project1-secrete-key", function(err, decodedToken) {
-
             if (err) {
-
-                return res.status(401).send({ status: false, msg: "Token is invalid" })
-
-            } else {
-                req.token = decodedToken
-                console.log(req.token)
-
-                next()
-
+                let message =
+                    err.message === "jwt expired" ? "Token is expired" : "Token is invalid";
+                return res.status(401).send({ status: false, msg: message })
             }
-        })
 
-    } catch (error) {
+            req.decodedToken = decodedToken //setting an attribute in req so that we can access it everywhere
 
-        res.status(500).send({ status: false, msg: error.message })
+            //console.log(decodedToken)
+            next()
+        });
+
+
+    } catch (err) {
+        return res.status(500).send({ status: false, msg: err.message });
     }
 }
-
-
-
-
 
 //---------------------------------------------Authorization------------------------------//
 
-const authorization = async function(req, res, next) {
+const authorization = async(req, res, next) => {
     try {
-        //------------------------------------------- AuthorisationByparam-----------------------------------------------//
+        let userLoggedIn = req.decodedToken
+        console.log(userLoggedIn)
+        let blogId = req.params.blogId;
 
+        if (!mongoose.isValidObjectId(blogId)) return res.status(400).send({ status: false, msg: "Please enter valid Book Id,it should be of 24 digits" })
 
-        let BlogId = req.params.blogId;
+        let checkBlog = await BlogsModel.findById(blogId)
+        if (!checkBlog) return res.status(404).send({ status: false, msg: "No book present with this book Id " })
+            // console.log(checkBlog)
 
-        const isblog = await BlogsModel.findOne({ _id: BlogId, isDeleted: false })
-        if (!isblog) {
-            return res.status(404).send({ status: false, message: "blog are not found" })
-        }
+        let userToBeModified = checkBlog.authorId.toString();
 
-        if (isblog.authorId.toString() !== req.token.authorId) {
+        //console.log(userToBeModified)
 
-            return res.status(403).send({ status: false, message: "you have not access for authorization" });
-        }
+        if (userToBeModified !== userLoggedIn.authorId) return res.status(403).send({ status: false, msg: 'User not authorized to perform this action' })
+
+        if (checkBlog.isDeleted == true) return res.status(400).send({ status: false, msg: "Book with the given id is already deleted!!" })
 
         next()
-
     } catch (err) {
-
-        res.status(500).send({ status: false, msg: err.message })
+        return res.status(500).send({ status: false, msg: err.message })
     }
-
 }
-
 
 module.exports = { authentication, authorization }

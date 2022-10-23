@@ -1,16 +1,13 @@
 const AuthorModel = require("../Models/AuthorModel");
 const jwt = require("jsonwebtoken");
+const { isValid, isValidEmail, isValidPassword, isValidRequestBody, } = require("../validator/validator")
 
-const isValid = function(value) {
-    if (typeof value === "undefined" || value === null) return false;
-    if (typeof value === "String " && value.trim().length === 0) return false;
-    return true;
-};
 
+//========================================CreateAuthor===================================//
 const createAuthor = async function(req, res) {
     try {
         const data = req.body;
-        if (Object.keys(data).length == 0) {
+        if (!isValidRequestBody(data)) {
             return res.status(400)
                 .send({
                     status: false,
@@ -80,7 +77,7 @@ const createAuthor = async function(req, res) {
                 .send({ status: false, msg: "Email should be mandatory" });
         }
 
-        if (!/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email)) {
+        if (!isValidEmail(email)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "please provide valid email" });
@@ -90,7 +87,7 @@ const createAuthor = async function(req, res) {
 
         if (dupEmail) {
             return res
-                .status(400)
+                .status(409)
                 .send({
                     status: false,
                     msg: "this email already exists please provide another email",
@@ -104,7 +101,7 @@ const createAuthor = async function(req, res) {
                 .send({ status: false, msg: "password must be required !" });
         }
 
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@])[A-Za-z\d@]{8,}$/.test(password)) {
+        if (!isValidPassword(password)) {
             return res
                 .status(400)
                 .send({
@@ -128,13 +125,12 @@ const createAuthor = async function(req, res) {
 const loginAuthor = async function(req, res) {
     try {
         const data = req.body;
-        if (Object.keys(data).length == 0) {
+        if (!isValidRequestBody(data)) {
             return res.status(400)
                 .send({
                     status: false,
                     msg: " please provide login details",
                 });
-
         }
         const { email, password } = data;
         if (!isValid(email)) {
@@ -142,7 +138,7 @@ const loginAuthor = async function(req, res) {
                 .status(400)
                 .send({ status: false, msg: "Email should be mandatory" });
         }
-        if (!/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email)) {
+        if (!isValidEmail(email)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "please provide valid email" });
@@ -152,7 +148,7 @@ const loginAuthor = async function(req, res) {
                 .status(400)
                 .send({ status: false, msg: "password must be required !" });
         }
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@])[A-Za-z\d@]{8,}$/.test(password)) {
+        if (!isValidPassword(password)) {
             return res
                 .status(400)
                 .send({
@@ -166,13 +162,13 @@ const loginAuthor = async function(req, res) {
                 .status(400)
                 .send({
                     status: false,
-                    msg: "username or the password is not correct",
+                    msg: "please provide valid credentials",
                 });
         }
-
-        //--------------------------------token creation-------------------------------------------------------//
+        let id = author._id.toString()
+            //--------------------------------token creation-------------------------------------------------------//
         let payload = {
-            authorId: author._id.toString(),
+            authorId: id,
             group: "project1",
             organisation: "group46",
         };
@@ -181,7 +177,7 @@ const loginAuthor = async function(req, res) {
 
         res.setHeader("x-api-key", token);
 
-        res.status(201).send({ status: true, msg: "token created successfully", data: token });
+        res.status(201).send({ status: true, msg: "token created successfully", authiorId: author._id, data: token });
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message });
     }

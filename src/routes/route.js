@@ -1,42 +1,44 @@
 const express = require('express');
-const Router = express.Router();
+const router = express.Router();
 
 const AuthorController = require("../Controllers/AuthorController")
 const BlogController = require("../Controllers/BlogsController")
-const commonMid = require("../middleware/auth")
+const { authentication, authorization } = require("../middleware/auth")
 
 //--------------------------------This is authors api-----------------------------//
 
-Router.post("/authors", AuthorController.createAuthor)
+router.post("/authors", AuthorController.createAuthor)
 
 
 //--------------------------------This is login api-----------------------------//
 
-Router.post("/login", AuthorController.loginAuthor)
+router.post("/login", AuthorController.loginAuthor)
 
 
 //--------------------------------This is CreateBlog api-----------------------------//
 
-Router.post("/blogs", commonMid.authentication, BlogController.createBlog)
+router.post("/blogs", BlogController.createBlog)
 
 
 //--------------------------------This is getBlog api-----------------------------//
 
-Router.get("/blogs", commonMid.authentication, BlogController.getBlog)
+router.get("/blogs", authentication, BlogController.getBlogs)
 
 
 //--------------------------------This is updateBlog api-----------------------------//
 
-Router.put("/blogs/:blogId", commonMid.authentication, commonMid.authorization, BlogController.updateBlog)
+router.put("/blogs/:blogId", authentication, authorization, BlogController.updateBlog)
 
 
 //--------------------------------This is deleteBlogs api-----------------------------//
 
-Router.delete("/blogs/:blogId", commonMid.authentication, commonMid.authorization, BlogController.deleteBlogs)
+router.delete("/blogs/:blogId", authentication, authorization, BlogController.deleteBlogs)
 
 
 //--------------------------------This is deleteByquery api-----------------------------//
 
-Router.delete("/blogs", commonMid.authentication, BlogController.deleteByquery)
+router.delete("/blogs", authentication, BlogController.deleteByquery)
 
-module.exports = Router;
+router.all("/*", (req, res) => { res.status(400).send({ status: false, message: "Endpoint is not correct plese provide a proper end-point" }) })
+
+module.exports = router;
