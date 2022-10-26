@@ -165,15 +165,13 @@ const loginAuthor = async function(req, res) {
                     msg: "please provide valid credentials",
                 });
         }
-        let id = author._id.toString()
-            //--------------------------------token creation-------------------------------------------------------//
-        let payload = {
-            authorId: id,
+
+        //--------------------------------token creation-------------------------------------------------------//
+        let token = jwt.sign({
+            authorId: author._id.toString(),
             group: "project1",
             organisation: "group46",
-        };
-
-        let token = jwt.sign({ payload }, "project1-secrete-key");
+        }, "project1-secrete-key");
 
         res.setHeader("x-api-key", token);
 
