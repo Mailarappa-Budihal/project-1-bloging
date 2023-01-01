@@ -17,7 +17,7 @@ router.post("/login", AuthorController.loginAuthor)
 
 //--------------------------------This is CreateBlog api-----------------------------//
 
-router.post("/blogs", BlogController.createBlog)
+router.post("/blogs", authentication,BlogController.createBlog)
 
 
 //--------------------------------This is getBlog api-----------------------------//
